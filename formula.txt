@@ -1,0 +1,20 @@
+=SE(CONT.SE(A$2:A$1000;E3) > 0; "É igual"; "Não é igual")
+
+Dentro do excel, separar uma ABA que terá uma coluna apenas para CNPJ de 2006 e outra para 2007.
+Formula: =SE(CONT.SE(A$2:A$131;E3) > 0; "É igual"; "Não é igual") 
+
+A$2:A$131 : coluna a cpjs 2006
+E: coluna CNPJ 2007
+
+=======================================
+
+ABA: (2006 a 2007) - 2008
+
+Dentro do excel, separar uma ABA que terá uma coluna apenas para CNPJ de (2006 a 2007) e outra para 2008.
+Formula: =SE(CONT.SE(A$2:A$131;E3) > 0; "É igual"; "Não é igual") 
+
+A$2:A$131 : coluna a cpjs (2006 e 2007)
+E: coluna CNPJ 2008
+
+=============================
+repetir o processo até (2006 a 2022) - 2023
