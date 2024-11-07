@@ -1,6 +1,4 @@
-library(dplyr)
-
-# Função para calcular novos CNPJs e proporção acumulada
+# Função ----
 calcular_proporcao_novos_cnpjs <- function(df, coluna_ano, coluna_cnpj) {
   # Cria uma cópia do data frame para não modificar o original
   df <- df %>% 
@@ -16,11 +14,14 @@ calcular_proporcao_novos_cnpjs <- function(df, coluna_ano, coluna_cnpj) {
   for (ano in unique(df$Ano_Base)) {
     cnpj_atual <- df$cnpj[df$Ano_Base == ano]
     
-    # Identifica os CNPJs novos (não presentes nos acumulados)
-    novos_cnpj <- setdiff(cnpj_atual, acumulados)
-    
-    # Marca como TRUE os CNPJs novos
-    df$CNPJ_novo[df$Ano_Base == ano & df$cnpj %in% novos_cnpj] <- TRUE
+    # Se for o primeiro ano (2006 ou o primeiro ano disponível), todos os CNPJs são novos
+    if (ano == min(df$Ano_Base)) {
+      df$CNPJ_novo[df$Ano_Base == ano] <- TRUE
+    } else {
+      # Identifica os CNPJs novos (não presentes nos acumulados)
+      novos_cnpj <- setdiff(cnpj_atual, acumulados)
+      df$CNPJ_novo[df$Ano_Base == ano & df$cnpj %in% novos_cnpj] <- TRUE
+    }
     
     # Atualiza o vetor acumulado com os novos CNPJs
     acumulados <- unique(c(acumulados, cnpj_atual))
@@ -38,26 +39,38 @@ calcular_proporcao_novos_cnpjs <- function(df, coluna_ano, coluna_cnpj) {
   
   return(resultado)
 }
-
-
-
-# Teste -----
+# Teste Base qualquer -----
 
 # Data frame de exemplo (ou substitua com seu próprio data frame)
 df_exemplo <- data.frame(
-  Indice_AnoBase = 1:10,
-  Razão_Social = rep("Empresa", 10),
+  Indice_AnoBase = 1:12,
+  Razão_Social = rep("Empresa", 12),
   cnpj = c("12345678000195", "12345678000195", "23456789000112", "34567890000123",
            "12345678000195", "23456789000112", "45678901000134", "56789012000145",
-           "67890123000156", "78901234000167"),
-  UF = rep("SP", 10),
-  Ano_Base = c(2006, 2006, 2007, 2007, 2008, 2008, 2009, 2010, 2011, 2011)
-)
+           "67890123000156", "78901234040167","78901234040167","78901234400167"),
+  UF = rep("SP", 12),
+  Ano_Base = c(2006, 2006, 2007, 2007, 2008, 2008, 2009, 2010, 2011, 2011,2010, 2011)
+) |> 
+  arrange(Ano_Base)
 
 print(df_exemplo)
 
-# Chamando a função
 resultado <- calcular_proporcao_novos_cnpjs(df_exemplo, coluna_ano = Ano_Base, coluna_cnpj = cnpj)
 
-# Verificando o resultado
-print(resultado)
+print(resultado)  
+
+
+# Teste amostra base de dados CNPJ -----
+library(readxl)
+getwd()
+
+df_menor<-
+  readxl::read_xlsx(path = 'base/CNPJ - pag.Lei-doBem & pasta.P-rede.xlsx', sheet = 1) |> 
+  select(Ano_Base = Ano_Base, cnpj = cnpj) |> 
+  filter(Ano_Base %in% c(2006:2007)) |>
+  arrange(Ano_Base)
+
+print(df_menor,n = 430)
+
+# função
+calcular_proporcao_novos_cnpjs(df_menor, coluna_ano = Ano_Base, coluna_cnpj = cnpj)
