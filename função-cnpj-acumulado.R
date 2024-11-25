@@ -1,3 +1,5 @@
+library(tidyverse)
+
 # Função ----
 calcular_proporcao_novos_cnpjs <- function(df, coluna_ano, coluna_cnpj) {
   # Cria uma cópia do data frame para não modificar o original
@@ -74,3 +76,17 @@ print(df_menor,n = 430)
 
 # função
 calcular_proporcao_novos_cnpjs(df_menor, coluna_ano = Ano_Base, coluna_cnpj = cnpj)
+
+
+
+# Base completa----
+base_completa <- 
+  readxl::read_xlsx(path = 'base/base completa.xlsx', sheet = 2) |>
+  select(Ano_Base, cnpj) |> 
+  arrange(Ano_Base) |> 
+  mutate(
+    Ano_Base = as.integer(Ano_Base),
+  )
+
+calcular_proporcao_novos_cnpjs(df = base_completa,coluna_ano = Ano_Base, coluna_cnpj = cnpj)
+
