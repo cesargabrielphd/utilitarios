@@ -1,16 +1,66 @@
 import os
-def print_tree(startpath, file_output, prefix=""):
-    for root, dirs, files in os.walk(startpath):
-        level = root.replace(startpath, "").count(os.sep)
-        indent = " " * 4 * (level)
-        file_output.write(f"{prefix}|--- {os.path.basename(root)}/\n")
-        subindent = " " * 4 * (level + 1)
-        for f in files:
-            file_output.write(f"{subindent}|____ {f}\n")
-        prefix = " " * 4 * (level + 1)
-# Caminho do repositório local
-caminho_do_repositorio = "."
-# Cria e escreve no arquivo directory_tree.txt com codificação UTF-8
-with open("directory_tree.txt", "w", encoding="utf-8") as file_output:
-    print_tree(caminho_do_repositorio, file_output)
-print("A árvore de diretórios foi salva em 'directory_tree.txt'")
+def generate_tree(root_dir, prefix=""):
+    tree = []
+    files = sorted(os.listdir(root_dir))
+    for i, name in enumerate(files):
+        path = os.path.join(root_dir, name)
+        if os.path.isdir(path):
+            tree.append(f"{prefix}├───{name}/")
+            if i == len(files) - 1:
+                tree.extend(generate_tree(path, prefix + "    "))
+            else:
+                tree.extend(generate_tree(path, prefix + "│   "))
+        else:
+            tree.append(f"{prefix}└───{name}")
+    return tree
+def save_tree_to_txt(tree, filename="tree_structure.txt"):
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write("\n".join(tree))
+
+root_directory = "." 
+tree_structure = generate_tree(root_directory)
+save_tree_to_txt(tree_structure)
+
+print(f"Tree structure saved to {os.path.abspath('tree_structure.txt')}")
+
+# Versão 2
+import os
+
+
+def generate_tree(root_dir, prefix="", ignore_dirs=None):
+    if ignore_dirs is None:
+        ignore_dirs = []
+    ignore_dirs = [d.strip("/").strip() for d in ignore_dirs]
+    tree = []
+    files = sorted(os.listdir(root_dir))
+    for i, name in enumerate(files):
+        path = os.path.join(root_dir, name)
+        if os.path.isdir(path):
+            if name in ignore_dirs:
+                continue
+            tree.append(f"{prefix}├───{name}/")
+            if i == len(files) - 1:
+                tree.extend(generate_tree(path, prefix + "    ", ignore_dirs))
+            else:
+                tree.extend(generate_tree(path, prefix + "│   ", ignore_dirs))
+        else:
+            tree.append(f"{prefix}└───{name}")
+    return tree
+
+
+def save_tree_to_txt(tree, filename="tree_structure.txt"):
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write("\n".join(tree))
+
+
+if __name__ == "__main__":
+    root_directory = "." 
+    ignore_dirs = input(
+        "Digite os nomes das pastas que deseja ignorar, separados por vírgulas: "
+    ).split(",")
+    ignore_dirs = [d.strip() for d in ignore_dirs]
+
+    tree_structure = generate_tree(root_directory, ignore_dirs=ignore_dirs)
+    save_tree_to_txt(tree_structure)
+
+    print(f"Tree structure saved to {os.path.abspath('tree_structure.txt')}")
